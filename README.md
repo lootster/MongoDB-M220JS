@@ -122,7 +122,7 @@ this course.
 Log-in to your Atlas account and create a new project named **M220** by clicking
 on the **Context** dropdown menu:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_create_project.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_create_project.png
 
 After creating a new project, you need to create an **mflix** free tier cluster.
 
@@ -134,7 +134,7 @@ If you do not have an existing Atlas account, go ahead and `create an Atlas
 Account <https://cloud.mongodb.com/links/registerForAtlas>`_ by filling in the
 required fields:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/atlas_registration.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/atlas_registration.png
 
 
 Creating a free tier cluster called "mflix":
@@ -145,24 +145,24 @@ Creating a free tier cluster called "mflix":
 1. After creating a new project, you will be prompted to create the first
    cluster in that project:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_create.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_create.png
 
 
 2. Choose AWS as the cloud provider, in a Region that has the label
    **Free Tier Available**:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_provider.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_provider.png
 
 
 3. Select **Cluster Tier** M0:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_tier.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_tier.png
 
 
 4. Set **Cluster Name** to **mflix** and click **Create Cluster**. It may take
    7-10 minutes to successfully create your Atlas cluster:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_name.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_name.png
 
 
 5. Once you press **Create Cluster**, you will be redirected to the account
@@ -170,20 +170,20 @@ Creating a free tier cluster called "mflix":
    **M220**. Go to **Settings** menu item and change the project name from the
    default **Project 0** to **M220**:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_project.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_project.png
 
 
 6. Next, configure the security settings of this cluster, by enabling the **IP
    Whitelist** and **MongoDB Users**:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_ipwhitelisting.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_ipwhitelisting.png
 
 Update your IP Whitelist so that your app can talk to the cluster. Click the
 **Security** tab from the **Clusters** page. Then click **IP Whitelist**
 followed by **Add IP Address**. Finally, click **Allow Access from Anywhere**
 and click **Confirm**.
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_allowall.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_allowall.png
 
 
 7. Then create the application MongoDB database user required for this course:
@@ -195,14 +195,14 @@ You can create new users through **Security** -> **Add New User**.
 
 Allow this user the privilege to **Read and write to any database**:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_application_user.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_application_user.png
 
 
 8. When the user is created, and the cluster deployed, you can test the setup by
    connecting via the Mongo shell. You can find instructions to connect in the
    **Connect Your Application** section of the cluster dashboard:
 
-.. image:: https://s3.amazonaws.com/university-courses/m220/cluster_connect_application.png
+[logo]: https://s3.amazonaws.com/university-courses/m220/cluster_connect_application.png
 
 Go to your cluster **Overview** -> **Connect** -> **Connect Your Application**.
 Select the option corresponding to your local MongoDB version and copy the
