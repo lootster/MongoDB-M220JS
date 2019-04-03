@@ -314,3 +314,69 @@ run the command:
 
 Each ticket will contain the exact command to run that ticket's specific unit
 tests. You can run these commands from anywhere in the **mflix-js** project.
+
+Final Exam
+----------------------
+
+#### Final: Question 1
+Correct Answer:
+
+```javascript
+  elections.find( { winner_party: "Republican",
+                     winner_electoral_votes: { "$gte": 160 } } )
+```
+
+This will find the documents whose winner_party is Republican, and whose winner_electoral_votes is greater than or equal to 160.
+   
+#### Final: Question 2
+Correct Answer:
+
+```javascript
+phones.updateMany( { software_version: { "$lt": 4.0 } },
+                       { "$set": { needs_to_update: true } } )
+```
+This will find all phones with a software_version below 4.0, and set the needs_to_update field to True for those documents.
+
+#### Final: Question 3
+Correct Answers:
+
+```javascript
+expect(clientOptions.authSource).toBe("admin")
+```
+By default, **MongoClient** objects will authenticate against the **admin** database. To use the login credentials stored on another database., we can add `authSource=<some-other-DB>` at the end of the URI string.
+
+```javascript
+expect(clientOptions.retryWrites).toBe(true)
+```
+
+Because we passed `retryWrites: true` to our `MongoClient.connect()` statement, this variable is set to **true** for any query issued using this connection.
+
+#### Final: Question 4
+
+The answer is `w: majority`.
+
+Sending a write with `w: majority` will cause MongoDB to wait for the write to be applied by a **majority** of nodes in the set. In a 3-node replica set, a majority is constituted by 2 nodes, so MongoDB will send an acknowledgement back to the client when 2 nodes have applied the write.
+
+#### Final: Question 5
+Correct Answers:
+
+Inserts #1, #2, and #3 will succeed.
+
+These writes do not conflict with each other, and they should all succeed if there are no network errors.
+
+#### Final: Question 6
+Correct Answer:
+
+*A Timeout error, resolved by wrapping the call in a try/catch block.*
+
+This error is best handled in the backend by wrapping the database call in a try/catch block. This way, the error can be handled somewhere in the **catch** block, instead of the error bubbling up to other layers of the software.
+
+#### Final: Question 7
+Correct Answer
+
+```javascript
+people_heights.find().sort({ height: -1 }).skip(3).limit(2)
+```
+
+This will sort on height, and then skip the top 3 tallest people to get the 4th- and 5th-tallest people.
+
