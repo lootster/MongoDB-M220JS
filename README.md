@@ -712,8 +712,209 @@ static async deleteComment(commentId, userEmail) {
 }
 ```
 
-Final Exam
 ----------------------
+
+### Chapter 3: Admin Backend
+
+**Ticket: User Report**
+
+Here's a possible implementation. We added the `$sort` and `$limit` stages to the pipeline before issuing the aggregation to ensure we get 20 results in the correct order.
+
+```Javascript
+static async mostActiveCommenters() {
+  try {
+    // here's how the pipeline stages are assembled
+    const groupStage = { $group: { _id: "$email", count: { $sum: 1 } } }
+    const sortStage = { $sort: { count: -1 } }
+    const limitStage = { $limit: 20 }
+    const pipeline = [groupStage, sortStage, limitStage]
+
+    // here's how the Read Concern durability is increased
+    const readConcern = { level: "majority" }
+
+    const aggregateResult = await comments.aggregate(pipeline, {
+      readConcern,
+    })
+
+    return await aggregateResult.toArray()
+  } catch (e) {
+    console.error(`Unable to delete comment: ${e}`)
+    return { error: e }
+  }
+}
+```
+
+### Chapter 3: Admin Backend
+
+**Ticket: Migration**
+
+Here's a possible implementation for this ticket:
+
+```Javascript
+const MongoClient = require("mongodb").MongoClient
+const ObjectId = require("mongodb").ObjectId
+const MongoError = require("mongodb").MongoError
+
+// This syntax is called an Immediately Invoked Function Executioin (IIFE)
+// It's useful for proper scoping, and in this case allowing us to use
+// async/await syntax
+
+;(async () => {
+  try {
+    const host = "mongodb://localhost:27017"
+    const client = await MongoClient.connect(
+      host,
+      { useNewUrlParser: true },
+    )
+    const mflix = client.db("mflix")
+
+    const predicate = { lastupdated: { $exists: true, $type: "string" } }
+    // we use the projection here to only return the _id and lastupdated fields
+    const projection = { lastupdated: 1 }
+
+    const cursor = await mflix
+      .collection("movies")
+      .find(predicate, projection)
+      .toArray()
+    const moviesToMigrate = cursor.map(({ _id, lastupdated }) => ({
+      updateOne: {
+        filter: { _id: ObjectId(_id) },
+        update: {
+          $set: { lastupdated: Date.parse(lastupdated) },
+        },
+      },
+    }))
+    // What's the strange "\x1b[32m"? It's coloring. 31 is red, 32 is green
+    console.log(
+      "\x1b[32m",
+      `Found ${moviesToMigrate.length} documents to update`,
+    )
+    // Here's where we dispatch the bulk update. We destructure the
+    // modifiedCount key out of the result
+
+    const { modifiedCount } = await mflix
+      .collection("movies")
+      .bulkWrite(moviesToMigrate)
+
+    console.log("\x1b[32m", `${modifiedCount} documents updated`)
+    client.close()
+    process.exit(0)
+  } catch (e) {
+    // check to see if the error was a MongoError and specifically a
+    // Invalid Operation error, meaning no documents to update
+    if (
+      e instanceof MongoError &&
+      e.message.slice(0, "Invalid Operation".length) === "Invalid Operation"
+    ) {
+      console.log("\x1b[32m", "No documents to update")
+    } else {
+      console.error("\x1b[31m", `Error during migration, ${e}`)
+    }
+    process.exit(1)
+  }
+})()
+```
+----------------------
+### Chapter 4: Resiliency
+
+**Ticket: Connection Pooling**
+
+Here's an initialization of the `MongoClient`, with a larger connection pool:
+
+```Javascript
+MongoClient.connect(
+  process.env.MFLIX_DB_URI,
+  { poolSize: 50, useNewUrlParser: true },
+)
+```
+
+### Chapter 4: Resiliency
+
+**Ticket: Timeouts**
+
+Here's our implementation, providing the optional keyword argument `wtimeout` to the MongoClient connection.
+
+```Javascript
+MongoClient.connect(
+  process.env.MFLIX_DB_URI,
+  { wtimeout: 2500, poolSize: 50, useNewUrlParser: true },
+)
+```
+
+### Chapter 4: Resiliency
+
+**Ticket: Handling Errors**
+
+Here's an implementation of `getMovieByID()`, with the `InvalidId` error handled:
+
+```Javascript
+static async getMovieByID(id) {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          _id: ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "comments",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$movie_id", "$$id"],
+                },
+              },
+            },
+            {
+              $sort: {
+                date: -1,
+              },
+            },
+          ],
+          as: "comments",
+        },
+      },
+    ]
+    return await movies.aggregate(pipeline).next()
+  } catch (e) {
+    // here's how the InvalidId error is identified and handled
+    if (
+      e
+        .toString()
+        .startsWith(
+          "Error: Argument passed in must be a single String of 12 bytes or a string of 24 hex characters",
+        )
+    ) {
+      return null
+    }
+    console.error(`Something went wrong in getMovieByID: ${e}`)
+    throw e
+  }
+}
+```
+
+### Chapter 4: Resiliency
+
+**Ticket: Principle of Least Privilege**
+
+To complete this ticket, you had to create a user that only has **readWrite** access to the **mflix** database only.
+
+![alt text][logo]
+
+[logo]:
+https://s3.amazonaws.com/university-courses/m220/mflix_app_user.png
+
+Then replace the authentication credentials, with this new user ones, in the MongoDB URI SRV string in your configuration file:
+
+```Javascript
+mongodb+srv://mflixAppUser:mflixAppPwd@<YOUR_CLUSTER_HOST>/admin
+```
+
+----------------------
+## Final Exam
 
 ### Final: Question 1
 Correct Answer:
