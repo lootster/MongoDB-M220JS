@@ -1,6 +1,5 @@
-=====
-Mflix
-=====
+
+# Mflix
 
 This is a short guide on setting up the system and environment dependencies
 required for the MFlix application to run.
@@ -46,9 +45,9 @@ Once the installation is complete, you may need to restart your computer before
 using the command line tools. You can test that it's installed by running the
 following command:
 
-.. code-block:: sh
-
-  node -v
+```
+node -v
+```
 
 This should print out the version of ``node`` you currently have - we recommend
 using version 10 or later, so this command should print something like
@@ -57,9 +56,9 @@ using version 10 or later, so this command should print something like
 Once ``npm`` is installed, you can install the MFlix dependencies by running the
 following command from the **mflix-js** directory:
 
-.. code-block:: sh
-
+  ```
   npm install
+  ```
 
 You must run this from the top level of the project, so ``npm`` has access to
 the **package.json** file where the dependencies are.
@@ -113,7 +112,6 @@ be different from the actual Atlas UI interface.*
 
 
 Using an existing MongoDB Atlas Account:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you already have a previous Atlas account created, perhaps because you've
 taken one of our other MongoDB university courses, you can repurpose it for
@@ -122,28 +120,33 @@ this course.
 Log-in to your Atlas account and create a new project named **M220** by clicking
 on the **Context** dropdown menu:
 
+![alt text][logo]
+
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_create_project.png
 
 After creating a new project, you need to create an **mflix** free tier cluster.
 
 
 Creating a new MongoDB Atlas Account:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 If you do not have an existing Atlas account, go ahead and `create an Atlas
 Account <https://cloud.mongodb.com/links/registerForAtlas>`_ by filling in the
 required fields:
 
+![alt text][logo]
+
 [logo]: https://s3.amazonaws.com/university-courses/m220/atlas_registration.png
 
 
 Creating a free tier cluster called "mflix":
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Note: You will need to do this step even if you are reusing an Atlas account.*
 
 1. After creating a new project, you will be prompted to create the first
    cluster in that project:
+
+![alt text][logo]
 
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_create.png
 
@@ -151,16 +154,22 @@ Creating a free tier cluster called "mflix":
 2. Choose AWS as the cloud provider, in a Region that has the label
    **Free Tier Available**:
 
+![alt text][logo]
+
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_provider.png
 
 
 3. Select **Cluster Tier** M0:
+
+![alt text][logo]
 
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_tier.png
 
 
 4. Set **Cluster Name** to **mflix** and click **Create Cluster**. It may take
    7-10 minutes to successfully create your Atlas cluster:
+
+![alt text][logo]
 
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_name.png
 
@@ -170,11 +179,15 @@ Creating a free tier cluster called "mflix":
    **M220**. Go to **Settings** menu item and change the project name from the
    default **Project 0** to **M220**:
 
+![alt text][logo]
+
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_project.png
 
 
 6. Next, configure the security settings of this cluster, by enabling the **IP
    Whitelist** and **MongoDB Users**:
+
+![alt text][logo]
 
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_ipwhitelisting.png
 
@@ -182,6 +195,8 @@ Update your IP Whitelist so that your app can talk to the cluster. Click the
 **Security** tab from the **Clusters** page. Then click **IP Whitelist**
 followed by **Add IP Address**. Finally, click **Allow Access from Anywhere**
 and click **Confirm**.
+
+![alt text][logo]
 
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_allowall.png
 
@@ -195,12 +210,16 @@ You can create new users through **Security** -> **Add New User**.
 
 Allow this user the privilege to **Read and write to any database**:
 
+![alt text][logo]
+
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_application_user.png
 
 
 8. When the user is created, and the cluster deployed, you can test the setup by
    connecting via the Mongo shell. You can find instructions to connect in the
    **Connect Your Application** section of the cluster dashboard:
+
+![alt text][logo]
 
 [logo]: https://s3.amazonaws.com/university-courses/m220/cluster_connect_application.png
 
@@ -212,9 +231,10 @@ The below example connects to Atlas as the user you created before, with
 username **m220student** and password **m220password**. You can run this command
 from your command line:
 
-.. code-block:: sh
 
-  mongo "mongodb+srv://m220student:m220password@<YOUR_CLUSTER_URI>"
+```
+mongo "mongodb+srv://m220student:m220password@<YOUR_CLUSTER_URI>"
+```
 
 By connecting to the server from your host machine, you have validated that the
 cluster is configured and reachable from your local workstation.
@@ -235,14 +255,14 @@ and password credentials).
 
 Replace the SRV string below with your own:
 
-.. code-block:: sh
 
-  # navigate to mflix-js directory
-  cd mflix-js
-
+navigate to mflix-js directory
+```
+cd mflix-js
+```
   # import data into Atlas
-  mongorestore --drop --gzip --uri \
-    "mongodb+srv://m220student:m220password@<YOUR_CLUSTER_URI>" data
+  `mongorestore --drop --gzip --uri \
+    "mongodb+srv://m220student:m220password@<YOUR_CLUSTER_URI>" data`
 
 The entire dataset contains almost 200,000 documents, so importing this data may
 take 5-10 minutes.
@@ -261,7 +281,7 @@ connection string as directed in the comment. This is the information the driver
 will use to connect. Make sure **not** to wrap your Atlas SRV connection between
 quotes::
 
-  MFLIX_DB_URI = mongodb+srv://...
+  `MFLIX_DB_URI = mongodb+srv://...`
 
 It's highly suggested you also change the **SECRET_KEY** to some very long, very
 random string. While this application is only meant for local use during this
@@ -269,29 +289,31 @@ course, software has a strange habit of living a long time.
 
 When you've edited the file, rename it to **.env** with the following command:
 
-.. code-block:: sh
-
+```
   mv dotenv_unix .env  # on Unix
   ren dotenv_win .env  # on Windows
-
+```
 *Note:* Once you rename this file to **.env**, it will no longer be visible in
 Finder or File Explorer. However, it will be visible from Command Prompt or
 Terminal, so if you need to edit it again, you can open it from there:
 
-.. code-block:: sh
-
+```
  vi .env       # on Unix
  notepad .env  # on Windows
+```
 
 In the **mflix-js** directory, run the following commands:
 
-.. code-block:: sh
 
-  # install MFlix dependencies
-  npm install
+*install MFlix dependencies*
+```
+npm install
+```
 
-  # start the MFlix application
-  npm start
+*start the MFlix application*
+```
+npm start
+```
 
 This will start the application. You can then access the MFlix application at
 `http://localhost:5000/ <http://localhost:5000/>`_.
@@ -308,9 +330,9 @@ Each course lab contains a module of unit tests that you can call individually
 with ``npm test``. For example, to run the test **connection-pooling.test.js**,
 run the command:
 
-.. code-block:: sh
-
+```
   npm test -t connection-pooling
+```
 
 Each ticket will contain the exact command to run that ticket's specific unit
 tests. You can run these commands from anywhere in the **mflix-js** project.
