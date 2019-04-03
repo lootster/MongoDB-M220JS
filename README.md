@@ -337,10 +337,385 @@ run the command:
 Each ticket will contain the exact command to run that ticket's specific unit
 tests. You can run these commands from anywhere in the **mflix-js** project.
 
+----------------------
+### Chapter 1: Driver Setup
+
+**Ticket: Connection**
+
+The exact connection string will depend on your Atlas cluster. After you correctly assign it, your .env file should look similar to the following (this was what our .env file looked like during development):
+
+```javascript
+SECRET_KEY=everyone_is_a_critic
+MFLIX_DB_URI=mongodb+srv://m220student:m220password@mflix-zux0z.mongodb.net/mflix
+MFLIX_NS=mflix
+PORT=5000
+```
+
+### Chapter 1: Driver Setup
+
+**Ticket: Projection**
+
+Here's a possible implementation of the getMoviesByCountry method:
+
+```javascript
+let cursor
+try {
+  // here's the find query with query predicate and field projection
+  cursor = await movies
+    .find({ countries: { $in: countries } })
+    .project({ title: 1 })
+} catch (e) {
+  console.error(`Unable to issue find command, ${e}`)
+  return []
+}
+```
+### Chapter 1: Driver Setup
+
+**Ticket: Text and Subfield Search**
+
+Here's a possible implementation for this ticket:
+
+```javascript
+static genreSearchQuery(genre) {
+  // here's how the genres query is implemented
+  const query = { genres: { $in: searchGenre } }
+  const project = {}
+  const sort = DEFAULT_SORT
+
+  return { query, project, sort }
+}
+```
+----------------------
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: Paging**
+
+A Note About Performance
+
+It is actually not ideal to implementing paging using `.skip()` and `.limit()`. This is because `.skip()` still requires iteration over the documents it's skipping. For more information (and a more performant implementation of paging), please visit the [MongoDB docs](https://docs.mongodb.com/manual/reference/method/cursor.skip/#using-range-queries).
+
+Here's a possible implementation of **getMovies** using `.skip()` and `.limit()`:
+
+```javascript
+try {
+  cursor = await movies
+    .find(query)
+    .project(project)
+    .sort(sort)
+} catch (e) {
+  console.error(`Unable to issue find command, ${e}`)
+  return { moviesList: [], totalNumMovies: 0 }
+}
+
+// here's where paging is implemented
+const displayCursor = cursor.skip(moviesPerPage * page).limit(moviesPerPage)
+```
+### Chapter 2: User-Facing Backend
+
+**Ticket: Faceted Search**
+
+Here is a possible implementation of `facetedSearch`:
+
+```javascript
+static async facetedSearch({
+  filters = null,
+  page = 0,
+  moviesPerPage = 20,
+} = {}) {
+  if (!filters || !filters.cast) {
+    throw new Error("Must specify cast members to filter by.")
+  }
+  const matchStage = { $match: filters }
+  const sortStage = { $sort: { "tomatoes.viewer.rating": -1 } }
+  const countingPipeline = [matchStage, sortStage, { $count: "count" }]
+  const skipStage = { $skip: moviesPerPage * page }
+  const limitStage = { $limit: moviesPerPage }
+  const facetStage = {
+    $facet: {
+      runtime: [
+        {
+          $bucket: {
+            groupBy: "$runtime",
+            boundaries: [0, 60, 90, 120, 180],
+            default: "other",
+            output: {
+              count: { $sum: 1 },
+            },
+          },
+        },
+      ],
+      rating: [
+        {
+          $bucket: {
+            groupBy: "$metacritic",
+            boundaries: [0, 50, 70, 90, 100],
+            default: "other",
+            output: {
+              count: { $sum: 1 },
+            },
+          },
+        },
+      ],
+      movies: [
+        {
+          $addFields: {
+            title: "$title",
+          },
+        },
+      ],
+    },
+  }
+
+  const queryPipeline = [
+    matchStage,
+    sortStage,
+    // here's where the three new stages are added
+    skipStage,
+    limitStage,
+    facetStage,
+  ]
+
+  try {
+    const results = await (await movies.aggregate(queryPipeline)).next()
+    const count = await (await movies.aggregate(countingPipeline)).next()
+    return {
+      ...results,
+      ...count,
+    }
+  } catch (e) {
+    return { error: "Results too large, be more restrictive in filter" }
+  }
+}
+```
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: User Management**
+
+Here are possible implementations for the methods required by this ticket:
+
+```javascript
+static async getUser(email) {
+  return await users.findOne({ email })
+}
+
+static async addUser(userInfo) {
+  try {
+    await users.insertOne({ ...userInfo })
+    return { success: true }
+  } catch (e) {
+    if (String(e).startsWith("MongoError: E11000 duplicate key error")) {
+      return { error: "A user with the given email already exists." }
+    }
+    console.error(`Error occurred while adding new user, ${e}.`)
+    return { error: e }
+  }
+}
+
+static async loginUser(email, jwt) {
+  try {
+    await sessions.updateOne(
+      { user_id: email },
+      { $set: { jwt } },
+      { upsert: true },
+    )
+    return { success: true }
+  } catch (e) {
+    console.error(`Error occurred while logging in user, ${e}`)
+    return { error: e }
+  }
+}
+
+static async logoutUser(email) {
+  try {
+    await sessions.deleteOne({ user_id: email })
+    return { success: true }
+  } catch (e) {
+    console.error(`Error occurred while logging out user, ${e}`)
+    return { error: e }
+  }
+}
+
+static async getUserSession(email) {
+  try {
+    return await sessions.findOne({ user_id: email })
+  } catch (e) {
+    console.error(`Error occurred while retrieving user session, ${e}`)
+    return null
+  }
+}
+```
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: Durable Writes**
+
+Correct answers:
+
+`w: 2, w: "majority"`
+
+In a 3-node replica set, these two Write Concerns will both wait until 2 nodes have applied a write. This is because 2 out of 3 nodes is a majority, and waiting for 2 nodes to apply a write is **more durable** than only waiting for 1 node to apply it.
+
+Updated `addUser` method (using `w: majority` ):
+
+```Javascript
+static async addUser(userInfo) {
+  try {
+    // here's where the new Write Concern is specified
+    await users.insertOne({ ...userInfo }, { w: "majority" })
+    return { success: true }
+  } catch (e) {
+    if (String(e).startsWith("MongoError: E11000 duplicate key error")) {
+      return { error: "A user with the given email already exists." }
+    }
+    console.error(`Error occurred while adding new user, ${e}.`)
+    return { error: e }
+  }
+}
+```
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: User Preferences**
+
+This is a possible implementation for this ticket:
+
+```Javascript
+static async updatePreferences(email, preferences) {
+  try {
+
+    // here's how the update statement is implemented
+    const updateResponse = await users.updateOne(
+      { email },
+      { $set: { preferences } },
+    )
+
+    if (updateResponse.matchedCount === 0) {
+      return { error: "No user found with that email" }
+    }
+    return updateResponse
+  } catch (e) {
+    return {
+      error: "An error occurred while updating this user's preferences.",
+    }
+  }
+}
+```
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: Get Comments**
+
+Here's a possible implementation of the `getMovieByID` method:
+
+```Javascript
+static async getMovieByID(id) {
+  try {
+    const pipeline = [
+      {
+        // find the current movie in the "movies" collection
+        $match: {
+          _id: ObjectId(id),
+        },
+      },
+      {
+        // lookup comments from the "comments" collection
+        $lookup: {
+          from: "comments",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              // only join comments with a match movie_id
+              $match: {
+                $expr: {
+                  $eq: ["$movie_id", "$$id"],
+                },
+              },
+            },
+            {
+              // sort by date in descending order
+              $sort: {
+                date: -1,
+              },
+            },
+          ],
+          // call embedded field comments
+          as: "comments",
+        },
+      },
+    ]
+    return await movies.aggregate(pipeline).next()
+  } catch (e) {
+    console.error(`Something went wrong in getMovieByID, ${e}`)
+    return null
+  }
+}
+```
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: Create/Update Comments**
+
+Here are possible implementations of `addComment` and `updateComment`:
+
+```Javascript
+static async addComment(movieId, user, comment, date) {
+  try {
+    // here's how the commentDoc is constructed
+    const commentDoc = {
+      name: user.name,
+      email: user.email,
+      movie_id: ObjectId(movieId),
+      text: comment,
+      date: date,
+    }
+
+    return await comments.insertOne(commentDoc)
+  } catch (e) {
+    console.error(`Unable to post comment: ${e}`)
+    return { error: e }
+  }
+}
+
+static async updateComment(commentId, userEmail, text, date) {
+  try {
+    // here's how the update is performed
+    const updateResponse = await comments.updateOne(
+      { _id: ObjectId(commentId), email: userEmail },
+      { $set: { text, date } },
+    )
+
+    return updateResponse
+  } catch (e) {
+    console.error(`Unable to update comment: ${e}`)
+    return { error: e }
+  }
+}
+```
+
+### Chapter 2: User-Facing Backend
+
+**Ticket: Delete Comments**
+
+Here's a possible implementation of `deleteComment`:
+
+```Javascript
+static async deleteComment(commentId, userEmail) {
+  const deleteResponse = await comments.deleteOne({
+    _id: ObjectId(commentId),
+    // the user's email is passed here to make sure they own the comment
+    email: userEmail,
+  })
+
+  return deleteResponse
+}
+```
+
 Final Exam
 ----------------------
 
-#### Final: Question 1
+### Final: Question 1
 Correct Answer:
 
 ```javascript
