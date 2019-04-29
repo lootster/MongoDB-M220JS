@@ -8,7 +8,7 @@ const MongoError = require("mongodb").MongoError
 
 ;(async () => {
   try {
-    const host = "mongodb://localhost:27017"
+    const host = "mongodb+srv://mflixAppUser:mflixAppPwd@mflix-zyndj.mongodb.net/test"
     const client = await MongoClient.connect(
       host,
       { useNewUrlParser: true },

@@ -350,6 +350,7 @@ MFLIX_DB_URI=mongodb+srv://m220student:m220password@mflix-zux0z.mongodb.net/mfli
 MFLIX_NS=mflix
 PORT=5000
 ```
+`5a9026003a466d5ac6497a9d`
 
 ### Chapter 1: Driver Setup
 
@@ -369,6 +370,9 @@ try {
   return []
 }
 ```
+
+`5a94762f949291c47fa6474d`
+
 ### Chapter 1: Driver Setup
 
 **Ticket: Text and Subfield Search**
@@ -385,6 +389,9 @@ static genreSearchQuery(genre) {
   return { query, project, sort }
 }
 ```
+
+`5a96a6a29c453a40d04922cc`
+
 ----------------------
 
 ### Chapter 2: User-Facing Backend
@@ -407,6 +414,8 @@ try {
   console.error(`Unable to issue find command, ${e}`)
   return { moviesList: [], totalNumMovies: 0 }
 }
+
+`5a9824d057adff467fb1f526`
 
 // here's where paging is implemented
 const displayCursor = cursor.skip(moviesPerPage * page).limit(moviesPerPage)
@@ -488,6 +497,7 @@ static async facetedSearch({
   }
 }
 ```
+`5aa7d3948adcc3fb770f06fb`
 
 ### Chapter 2: User-Facing Backend
 
@@ -546,6 +556,7 @@ static async getUserSession(email) {
   }
 }
 ```
+`5a8d8ee2f9588ca2701894be`
 
 ### Chapter 2: User-Facing Backend
 
@@ -827,6 +838,7 @@ MongoClient.connect(
   { poolSize: 50, useNewUrlParser: true },
 )
 ```
+`5ad4f4f58d4b377bcf55d742`
 
 ### Chapter 4: Resiliency
 
@@ -834,12 +846,14 @@ MongoClient.connect(
 
 Here's our implementation, providing the optional keyword argument `wtimeout` to the MongoClient connection.
 
+
 ```Javascript
 MongoClient.connect(
   process.env.MFLIX_DB_URI,
   { wtimeout: 2500, poolSize: 50, useNewUrlParser: true },
 )
 ```
+`5addf035498efdeb55e90b01`
 
 ### Chapter 4: Resiliency
 
@@ -896,6 +910,8 @@ static async getMovieByID(id) {
 }
 ```
 
+`5ae9b76a703c7c603202ef22`
+
 ### Chapter 4: Resiliency
 
 **Ticket: Principle of Least Privilege**
@@ -912,6 +928,7 @@ Then replace the authentication credentials, with this new user ones, in the Mon
 ```Javascript
 mongodb+srv://mflixAppUser:mflixAppPwd@<YOUR_CLUSTER_HOST>/admin
 ```
+`5b61be29094dbae03bf30616`
 
 ----------------------
 ## Final Exam
